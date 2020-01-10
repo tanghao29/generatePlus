@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>所有用户</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <base href="/generatePlus_war/">
+    <link rel="stylesheet" href="/generatePlus_war/layui/css/layui.css"  media="all">
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+    <script src="/generatePlus_war/layui/layui.js" charset="utf-8"></script>
+    <!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+
+    <!--判断男女-->
+    <script type="text/html" id="titleTpl">
+        {{#  if(d.asex==1){ }}
+        男
+        {{#  } else { }}
+        女
+        {{#  } }}
+    </script>
+
+    <!--序号-->
+    <script type="text/html" id="zizeng">
+        {{d.LAY_TABLE_INDEX+1}}
+    </script>
+    <!--添加修改和删除按钮-->
+    <script type="text/html" id="barDemo">
+        <a class="layui-btn layui-btn-sm layui-icon" lay-event="add">&#xe654;添加</a>
+        <a class="layui-btn layui-btn-sm layui-icon" lay-event="edit">&#xe642;修改</a>
+        <a class="layui-btn layui-btn-danger layui-btn-sm layui-icon" lay-event="del">&#xe640;删除</a>
+    </script>
+    <!--引入jquery文件-->
+    <script type="text/javascript" src="/generatePlus_war/js/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript">
+        $.ajax({
+            type:"post",
+            url:"courses/query_course_ajax.do",
+            dataType:"json",
+            success:function(data){
+                console.log("访问");
+                var option1="<option value=''>请选择</option>";
+                for(var i=0;i<data.length;i++){
+                    option1+="<option value="+data[i].cid+" >"+data[i].cname+"</option>";
+                }
+                $("#selt").html(option1);
+            },
+            error:function(){
+                alert("出错啦");
+            }
+        });
+    </script>
+
+<!--    开启头部工具栏-->
+    <script type="text/html" id="toolbarDemo">
+        <div class="layui-btn-container">
+            <button class="layui-btn layui-btn-sm" lay-event="getCheckData">获取选中行数据</button>
+            <button class="layui-btn layui-btn-sm" lay-event="getCheckLength">获取选中数目</button>
+            <button class="layui-btn layui-btn-sm" lay-event="isAll">验证是否全选</button>
+            <button class="layui-btn layui-btn-sm" lay-event="excel">导入Excel</button>
+            <button class="layui-btn layui-btn-sm" lay-event="exportExcel">导出Excel</button>
+        </div>
+    </script>
+
+</head>
+<body>
+<form class="layui-form"> <!-- 提示：如果你不想用form，你可以换成div等任何一个普通元素 -->
+
+<!--    查询姓名-->
+    <div class="layui-form-item">
+
+        <div class="layui-inline">
+            <label class="layui-form-label" >姓名</label>
+            <input type="text" name="aname" placeholder="请输入" width="180" autocomplete="off" class="layui-input">
+        </div>
+
+<!--    查询年龄-->
+        <div class="layui-inline">
+            <label class="layui-form-label">年龄</label>
+            <input type="text" name="age"  placeholder="请输入" autocomplete="off" class="layui-input">
+        </div>
+
+        <!--根据性别查询-->
+        <div class="layui-inline">
+            <label class="layui-form-label">单选框</label>
+            <input type="radio" name="asex" value=1 title="男" />
+            <input type="radio" name="asex" value=2 title="女" />
+        </div>
+
+<!--    根据班级查询-->
+        <div class="layui-inline">
+            <label class="layui-form-label">下拉选择框</label>
+            <select id="selt" name="cid" lay-filter="aihao">
+            </select>
+        </div>
+
+<!--        提交重置-->
+        <div class="layui-inline">
+            <button type="submit" class="layui-btn" lay-submit lay-filter="search">立即提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+    <!-- 更多表单结构排版请移步文档左侧【页面元素-表单】一项阅览 -->
+</form>
+
+<table class="layui-hide" id="test" lay-filter="test" border="1"></table>
+
+<script>
+    layui.use(['table','layer','form'], function(){
+        var table = layui.table;
+        var layer = layui.layer;
+        var form = layui.form;
+        //    监听submit
+        form.on('submit(search)', function(data){
+            console.log(data.field);
+            table.reload("test",{
+                where:data.field
+            });
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        });
+
+        //表数据
+        table.render({
+            elem: '#test'
+            ,toolbar: '#toolbarDemo' //开启头部工具栏，并为其绑定左侧模板
+            ,url:'accounts/queryAll.do'
+            ,text:{
+                none: '暂无相关数据' ,//默认：无数据。注：该属性为 layui 2.2.5 开始新增
+                icon:'layui-icon-face-surprised'
+            }
+            ,cols: [[
+                {type:'checkbox'},
+                {title:'序号',width:80,templet:"#zizeng"}
+                ,{field:'aname', width:80, title: '用户名'}
+                ,{field:'apass', width:80, title: '密码'}
+                ,{field:'asex', width:80, title: '性别',templet:"#titleTpl"}
+                ,{field:'age', title: '年龄', width:80,sort:true}
+                ,{field:'courses', width:85, title: '班级',templet:'<div>{{d.courses.cname}}</div>'}
+                ,{field:'img' ,width:100,height:100,title:'头像',templet:'<div><img src="img/{{d.img}}"/></div>'}
+                ,{width:160, title: '操作',templet:'#barDemo'}
+            ]]
+            ,page: true
+            ,limits:[3,5,8,10]
+            ,limit:3
+        });
+
+        //监听事件
+        table.on('tool(test)', function(obj){
+            var data = obj.data;
+             if(obj.event === 'del'){
+                layer.confirm('真的删除行么', function(index){
+                    $.ajax({
+                        url: "accounts/delete.do" ,
+                        data: {'aid':data.aid} ,
+                        type: "post" ,
+                        dataType:'json',
+                        success:function(data){
+                            if(data==200){
+                                table.reload("test",{})
+                                // location.reload()
+                            }else{
+                                layer.msg("删除失败");
+                            }
+                        }
+                    });
+                    obj.del();
+                    layer.close(index);
+                });
+            } else if(obj.event === 'edit'){
+                         layer.open({
+                             type: 2,
+                             area: ['500px', '500px'],
+                             content: 'accounts/queryById.do?aid='+data.aid, //这里content是一个普通的String
+                             end: function(){
+                                 table.reload("test",{})
+                             }
+                         });
+                     }else{
+                 layer.open({
+                     type: 2,
+                     area: ['500px', '500px'],
+                     content:'/generatePlus_war/html/addition.html', //这里content是一个普通的String
+                     end: function(){
+                         table.reload("test",{})
+                     }
+                 });
+             }
+                 });
+
+        //监听事件
+        table.on('toolbar(test)', function(obj){
+            var checkStatus = table.checkStatus(obj.config.id);
+            var data = checkStatus.data;
+            if(obj.event=="getCheckData"){
+                if(data.length!=0) {
+                    var boxs = "";
+                    for (var i = 0; i < data.length; i++) {
+                        boxs += checkStatus.data[i].aid
+                        if (i < data.length - 1) {
+                            boxs += ",";
+                        }
+                    }
+
+                    $.ajax({
+                        type: "post",
+                        url: "accounts/deDuoge.do",
+                        data: {boxs:boxs},
+                        dataType: "json",
+                        success: function (data) {
+                            if (data == "0") {
+                                layer.alert("批量删除成功！");
+                                table.reload("test",{})
+                            } else {
+                                layer.alert("批量删除失败!");
+                            }
+                        },
+                        error: function () {
+                            alert("内部出错啦！");
+                        }
+                    });
+                }else{
+                    layer.alert("未选择要删除的行，请选择！");
+                }
+
+            }else if(obj.event=="getCheckLength"){
+                layer.alert(data.length);
+            }else if(obj.event=="excel"){exportExcel
+                layer.open({
+                    type: 2,
+                    area: ['500px', '500px'],
+                    content: "html/excel.html", //这里content是一个普通的String
+                    end: function(){
+                        table.reload("test",{})
+                    }
+                });
+            }else if(obj.event=="exportExcel"){
+               window.location.href="accounts/exportExcel.do";
+            }
+            else{
+                layer.msg(checkStatus.isAll ? '全选': '未全选');
+            }
+
+        });
+
+
+    });
+</script>
+
+</body>
+</html>
