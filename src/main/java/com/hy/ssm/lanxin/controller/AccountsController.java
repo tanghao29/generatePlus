@@ -176,6 +176,7 @@ public class AccountsController {
             num="1";
         }
 //        return "redirect:/accounts/queryAll.do";
+        System.out.print("1111111111");
         return num;
     }
 
