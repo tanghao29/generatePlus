@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>修改</title>
+    <link rel="stylesheet" th:href="@{/layui/css/layui.css}" media="all">
+    <script th:src="@{/js/jquery-3.3.1.min.js}"></script>
+    <script type="text/javascript">
+        $.ajax({
+            type:"post",
+            url:"/generatePlus_war/courses/query_course_ajax.do",
+            dataType:"json",
+            success:function(data){
+                console.log("访问");
+                var option1="<option th:value=''>请选择</option>";
+                for(var i=0;i<data.length;i++){
+                    var num=data[i].cid;
+                    var a=[[${account.cid}]];
+                    if(a==num){
+                        option1+="<option value="+data[i].cid+" selected>"+data[i].cname+"</option>";
+
+                    }else{
+                        option1+="<option value="+data[i].cid+">"+data[i].cname+"</option>";
+                    }
+                }
+                $("#selt").html(option1);
+            },
+            error:function(){
+                alert("出错啦");
+            }
+        });
+    </script>
+</head>
+<body>
+<h1>修改用户</h1>
+
+<form class="layui-form"> <!-- 提示：如果你不想用form，你可以换成div等任何一个普通元素 -->
+   <input type="hidden" name="aid" th:value="${account.aid}"/>   <!-- 隐藏域-->
+    <div class="layui-form-item">
+        <label class="layui-form-label" >姓名</label>
+        <div class="layui-input-block">
+            <input type="text" name="aname" th:value="${account.aname}" placeholder="请输入" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">密码</label>
+        <div class="layui-input-block">
+            <input type="text" name="apass" th:value="${account.apass}" placeholder="请输入" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">年龄</label>
+        <div class="layui-input-block">
+            <input type="text" name="age" th:value="${account.age}" placeholder="请输入" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">下拉选择框</label>
+        <div class="layui-input-block">
+            <select id="selt" name="cid" lay-filter="aihao">
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">单选框</label>
+        <div class="layui-input-block">
+            <input type="radio" name="asex" th:value=1 title="男" th:checked='${account.asex eq 1}'/>
+            <input type="radio" name="asex" th:value=2 title="女" th:checked='${account.asex eq 2}'/>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button type="submit" class="layui-btn" lay-submit lay-filter="*">立即提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+    <!-- 更多表单结构排版请移步文档左侧【页面元素-表单】一项阅览 -->
+</form>
+<script src="/layui/layui.js"></script>
+<script>
+    layui.use('form', function(){
+        var form = layui.form;
+
+        //各种基于事件的操作，下面会有进一步介绍
+        form.render();
+    //    监听submit
+        form.on('submit(*)', function(data){
+            $.ajax({
+                type:"post",
+                url:"/generatePlus_war/accounts/updates.do",
+                data:data.field,
+                dataType:"json",
+                success:function(data){
+                    if(data=="0"){
+                        //当你在iframe页面关闭自身时
+                        var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                        parent.layer.close(index); //再执行关闭
+                    }else{
+                        layer.alert("修改失败 或请重新修改");
+                    }
+                },
+                error:function(){
+                    alert("内部出错啦！");
+                }
+            });
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        });
+
+
+    });
+</script>
+</body>
+</html>

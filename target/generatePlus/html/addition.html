@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>添加</title>
+    <link rel="stylesheet" href="/generatePlus_war/layui/css/layui.css" media="all">
+    <!--    <base th:href="@{/}">-->
+    <script src="/generatePlus_war/js/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript">
+        $.ajax({
+            type:"post",
+            url:"/generatePlus_war/courses/query_course_ajax.do",
+            dataType:"json",
+            success:function(data){
+                var option1="<option th:value=''>请选择</option>";
+                for(var i=0;i<data.length;i++){
+                    option1+="<option value="+data[i].cid+">"+data[i].cname+"</option>";
+                }
+                $("#selt").html(option1);
+            },
+            error:function(){
+                alert("出错啦");
+            }
+        });
+    </script>
+</head>
+<body>
+<h1>添加用户</h1>
+
+<form class="layui-form"  id="for"> <!-- 提示：如果你不想用form，你可以换成div等任何一个普通元素 -->
+    <!--用户-->
+    <div class="layui-form-item">
+        <label class="layui-form-label" >姓名</label>
+        <div class="layui-input-block">
+            <input type="text" name="aname"  placeholder="请输入" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <!--    密码-->
+    <div class="layui-form-item">
+        <label class="layui-form-label">密码</label>
+        <div class="layui-input-block">
+            <input type="text" name="apass"  placeholder="请输入" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <!--    年龄-->
+    <div class="layui-form-item">
+        <label class="layui-form-label">年龄</label>
+        <div class="layui-input-block">
+            <input type="text" name="age"  placeholder="请输入" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <!--性别-->
+    <div class="layui-form-item">
+        <label class="layui-form-label">单选框</label>
+        <div class="layui-input-block">
+            <input type="radio" name="asex" value=1 title="男" />
+            <input type="radio" name="asex" value=2 title="女" />
+        </div>
+    </div>
+
+    <!--    班级-->
+    <div class="layui-form-item">
+        <label class="layui-form-label">下拉选择框</label>
+        <div class="layui-input-block">
+            <select id="selt" name="cid" lay-filter="aihao">
+            </select>
+        </div>
+    </div>
+
+    <!--图片隐藏域-->
+    <input type="hidden" id="img" name="img"/>
+
+    <!--    提交图片-->
+    <div class="layui-upload">
+        <button type="button" class="layui-btn" id="test1">上传图片</button>
+        <div class="layui-upload-list">
+            <img class="layui-upload-img" id="demo1">
+            <p id="demoText"></p>
+        </div>
+    </div>
+
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button type="submit" class="layui-btn" lay-submit lay-filter="*">立即提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+    <!-- 更多表单结构排版请移步文档左侧【页面元素-表单】一项阅览 -->
+</form>
+<script src="/generatePlus_war/layui/layui.js"></script>
+
+<script>
+    layui.use(['form','jquery','upload'], function(){
+        var form = layui.form;
+        var $=layui.jquery;
+        var upload=layui.upload;
+
+        //各种基于事件的操作，下面会有进一步介绍
+        form.render();
+        //    监听submit
+        form.on('submit(*)', function(data){
+            console.log(data.field)
+            $.ajax({
+                type:"post",
+                url:"/generatePlus_war/accounts/Add.do",
+                data:data.field,
+                dataType:"json",
+                enctype:"multipart/form-data",
+                success:function(data){
+                    if(data=="0"){
+                        layer.alert("添加成功!!!");
+                        $("#for")[0].reset();
+                        $('#demo1').attr('src', "");
+                    }else{
+                        layer.alert("添加失败 或请重新修改!!!");
+                    }
+                },
+                error:function(){
+                    alert("内部出错啦！");
+                }
+            });
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        });
+
+        //普通图片上传
+        var uploadInst = upload.render({
+            elem: '#test1'
+            ,url: '/generatePlus_war/accounts/upload.do'
+            ,before: function(obj){
+                //预读本地文件示例，不支持ie8
+                obj.preview(function(index, file, result){
+                    $('#demo1').attr('src', result); //图片链接（base64）
+                });
+            }
+            ,done: function(res){
+                if(res.code==0){
+                    $("#img").val(res.filename);
+                }else{
+                    layui.alert("图片提交失败!");
+                }
+
+            }
+            ,error: function(){
+                //演示失败状态，并实现重传
+                var demoText = $('#demoText');
+                demoText.html('<span style="color: #ff5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
+                demoText.find('.demo-reload').on('click', function(){
+                    uploadInst.upload();
+                });
+            }
+        });
+
+    });
+</script>
+</body>
+</html>

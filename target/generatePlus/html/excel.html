@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/generatePlus_war/layui/css/layui.css" media="all">
+    <script src="/generatePlus_war/js/jquery-3.3.1.min.js"></script>
+    <script src="/generatePlus_war/layui/layui.js"></script>
+
+</head>
+<body>
+
+<button type="button" class="layui-btn" id="test3"><i class="layui-icon"></i>上传文件</button>
+
+
+<script>
+    layui.use('upload', function(){
+        var upload=layui.upload;
+
+//指定允许上传的文件类型
+        upload.render({
+            elem: '#test3'
+            ,url: '/generatePlus_war/accounts/inputExcel.do'
+            ,accept: 'file' //普通文件
+            ,done: function(res){
+                if(res.code==200){
+                   alert("添加成功!");
+                }
+            }
+        });
+
+
+    });
+</script>
+
+
+</body>
+</html>
