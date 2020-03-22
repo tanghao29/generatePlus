@@ -6,7 +6,7 @@ public class test_1 {
         StringBuffer stringBuffer=new StringBuffer("hello rd");
         stringBuffer.insert(6,"wo");
         System.out.println(stringBuffer);
-
+System.out.println("hello word");
 
     }
 
